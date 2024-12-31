@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "com.game.ui.foundation": {
-      "version": "file:com.game.ui.fundation",
+      "version": "file:com.game.ui.foundation",
       "depth": 0,
       "source": "embedded",
       "dependencies": {
