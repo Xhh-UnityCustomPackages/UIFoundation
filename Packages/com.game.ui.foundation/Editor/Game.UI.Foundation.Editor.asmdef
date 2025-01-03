@@ -1,7 +1,9 @@
 {
     "name": "Game.UI.Fundation.Editor",
     "rootNamespace": "",
-    "references": [],
+    "references": [
+        "GUID:21ca98f71739d8b4ea1552716794dc6f"
+    ],
     "includePlatforms": [
         "Editor"
     ],
