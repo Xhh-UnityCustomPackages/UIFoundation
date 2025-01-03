@@ -8,6 +8,7 @@ using UnityEditor.Overlays;
 using UnityEngine.UIElements;
 using UnityEditor;
 using UnityEditor.Graphs;
+using UnityEditor.SceneManagement;
 
 namespace Game.UI.Foundation.Editor
 {
@@ -62,8 +63,7 @@ namespace Game.UI.Foundation.Editor
 
         void OnClick()
         {
-            //得到Canvas
-            var canvas = GameObject.FindObjectOfType<Canvas>();
+            var canvas = CreateImage.GetCanvas();
             if (canvas == null)
                 return;
 
@@ -99,9 +99,7 @@ namespace Game.UI.Foundation.Editor
         void OnClick()
         {
             // 下一次点胶机到游戏物体得时候 就会创建子物体
-
-            // TODO 检测是否存在模板物体 有的话就直接走模板物体 直接Instance就可以
-            var canvas = GameObject.FindObjectOfType<Canvas>();
+            var canvas = CreateImage.GetCanvas();
             if (canvas == null)
                 return;
 
@@ -137,9 +135,28 @@ namespace Game.UI.Foundation.Editor
             clicked += OnClick;
         }
 
+        public static Transform GetCanvas()
+        {
+            var stage = PrefabStageUtility.GetCurrentPrefabStage();
+            if (stage != null)
+            {
+                var canvas = stage.prefabContentsRoot.transform.parent.gameObject.GetComponentInChildren<Canvas>();
+                if (canvas != null)
+                    return canvas.transform.GetChild(0);
+            }
+            else
+            {
+                var canvas = GameObject.FindObjectOfType<Canvas>();
+                if (canvas != null)
+                    return canvas.transform;
+            }
+
+            return null;
+        }
+
         void OnClick()
         {
-            var canvas = GameObject.FindObjectOfType<Canvas>();
+            var canvas = CreateImage.GetCanvas();
             if (canvas == null)
                 return;
 
