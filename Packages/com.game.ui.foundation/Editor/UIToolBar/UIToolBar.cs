@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
@@ -9,6 +10,7 @@ using UnityEngine.UIElements;
 using UnityEditor;
 using UnityEditor.Graphs;
 using UnityEditor.SceneManagement;
+using UnityEditor.Overlays;
 
 namespace Game.UI.Foundation.Editor
 {
@@ -28,6 +30,7 @@ namespace Game.UI.Foundation.Editor
             CreateText.id,
             CreateImage.id,
             PrefabWidget.id,
+            Settings.id,
             MoreDropdown.id
             // DropdownToggleExample.id
         )
@@ -37,48 +40,102 @@ namespace Game.UI.Foundation.Editor
 
 
     [EditorToolbarElement(id, typeof(SceneView))]
-    class CreateDesignImage : EditorToolbarButton //, IAccessContainerWindow
+    class CreateDesignImage : EditorToolbarDropdownToggle, IAccessContainerWindow
     {
         public const string id = "UIToorBar/CreateDesignImage";
+        public EditorWindow containerWindow { get; set; }
 
-        // IAccessContainerWindow provides a way for toolbar elements to access the `EditorWindow` in which they exist.
-        // Here we use `containerWindow` to focus the camera on our newly instantiated objects after creation.
-        //public EditorWindow containerWindow { get; set; }
 
-        // Because this is a VisualElement, it is appropriate to place initialization logic in the constructor.
-        // In this method you can also register to any additional events as required. In this example there is a tooltip, an icon, and an action.
+        private DesignImage m_DesignImage;
 
         public CreateDesignImage()
         {
-            // A toolbar element can be either text, icon, or a combination of the two. Keep in mind that if a toolbar is
-            // docked horizontally the text will be clipped, so usually it's a good idea to specify an icon.
-
             // text = "设计图";
             icon = AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.game.ui.foundation/Editor/Res/Icon/createDesignImage.png");
             tooltip = "创建设计图";
-            clicked += OnClick;
+
+
+            FindDesignImage();
+            value = m_DesignImage != null && m_DesignImage.gameObject.activeSelf;
+
+            this.RegisterValueChangedCallback(delegate(ChangeEvent<bool> evt)
+            {
+                FindDesignImage();
+
+                if (m_DesignImage != null)
+                    m_DesignImage.gameObject.SetActive(evt.newValue);
+
+                if (!evt.newValue)
+                {
+                    DesignImageFunctionWindow.CloseWindow();
+                }
+            });
+
+            RegisterCallback<AttachToPanelEvent>(OnAttachedToPanel);
+            RegisterCallback<DetachFromPanelEvent>(OnDetachFromPanel);
         }
 
-        // This method will be invoked when the `Create Cube` button is clicked.
-
-        void OnClick()
+        void OnAttachedToPanel(AttachToPanelEvent evt)
         {
-            var canvas = CreateImage.GetCanvas();
-            if (canvas == null)
+            dropdownClicked += OnDropdownClicked;
+        }
+
+        void OnDetachFromPanel(DetachFromPanelEvent evt)
+        {
+            dropdownClicked -= OnDropdownClicked;
+        }
+
+        void OnDropdownClicked()
+        {
+            FindDesignImage();
+            if (m_DesignImage == null)
+            {
+                var stage = PrefabStageUtility.GetCurrentPrefabStage();
+                if (stage == null)
+                    return;
+
+                var root = CreateImage.GetCanvas();
+                if (root == null)
+                    return;
+
+                var go = new GameObject();
+                m_DesignImage = go.AddComponent<DesignImage>();
+                go.layer = LayerMask.NameToLayer("UI");
+                go.transform.SetParent(root.transform);
+                var rt = (go.transform as RectTransform);
+                rt.SetStretch();
+
+                Undo.RegisterCreatedObjectUndo(go, "Create DesignImage");
+            }
+
+            ShowWindow();
+        }
+
+        void ShowWindow()
+        {
+            if (m_DesignImage == null) return;
+
+            if (!(containerWindow is SceneView view))
                 return;
 
-            var go = new GameObject();
-            go.AddComponent<DesignImage>();
-            go.layer = LayerMask.NameToLayer("UI");
-            go.transform.SetParent(canvas.transform);
-            var rt = (go.transform as RectTransform);
-            rt.SetStretch();
-            //TODO 还需要添加默认图片
+            var size = new Vector2(300, 80);
 
-            Undo.RegisterCreatedObjectUndo(go, "Create DesignImage");
+            var activatorRect = GUIUtility.GUIToScreenRect(this.worldBound);
+            DesignImageFunctionWindow.Show(activatorRect, size, m_DesignImage);
+        }
 
-            //if (containerWindow is SceneView view)
-            //    view.FrameSelected();
+        void FindDesignImage()
+        {
+            var stage = PrefabStageUtility.GetCurrentPrefabStage();
+            if (stage == null)
+                return;
+
+            var root = CreateImage.GetCanvas();
+            if (root == null)
+                return;
+
+            m_DesignImage = null;
+            m_DesignImage = root.gameObject.GetComponentInChildren<DesignImage>(true);
         }
     }
 
@@ -108,15 +165,16 @@ namespace Game.UI.Foundation.Editor
             {
                 go = new GameObject("Text");
                 var text = go.AddComponent<UnityEngine.UI.Text>();
+                text.text = "Text";
             }
             else
             {
                 go = GameObject.Instantiate(UIFoundationSettings.Instance.DefaultTextPrefab);
             }
 
-
             go.layer = LayerMask.NameToLayer("UI");
             go.transform.SetParent(canvas.transform);
+            (go.transform as RectTransform).anchoredPosition3D = Vector3.zero;
 
             Undo.RegisterCreatedObjectUndo(go, "Create Text");
         }
@@ -140,6 +198,7 @@ namespace Game.UI.Foundation.Editor
             var stage = PrefabStageUtility.GetCurrentPrefabStage();
             if (stage != null)
             {
+                if (stage.prefabContentsRoot.transform.parent == null) return null;
                 var canvas = stage.prefabContentsRoot.transform.parent.gameObject.GetComponentInChildren<Canvas>();
                 if (canvas != null)
                     return canvas.transform.GetChild(0);
@@ -165,7 +224,7 @@ namespace Game.UI.Foundation.Editor
             img.raycastTarget = false;
             go.layer = LayerMask.NameToLayer("UI");
             go.transform.SetParent(canvas.transform);
-
+            (go.transform as RectTransform).anchoredPosition3D = Vector3.zero;
             Undo.RegisterCreatedObjectUndo(go, "Create Image");
         }
 
@@ -216,15 +275,31 @@ namespace Game.UI.Foundation.Editor
 
 
     [EditorToolbarElement(id, typeof(SceneView))]
+    class Settings : EditorToolbarButton
+    {
+        public const string id = "UIToorBar/Settings";
+
+        public Settings()
+        {
+            // text = "Image";
+            icon = AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.game.ui.foundation/Editor/Res/Icon/setting.png");
+            tooltip = "设置";
+            clicked += OnClick;
+        }
+
+        void OnClick()
+        {
+            SettingsService.OpenProjectSettings("Project/UI Foundation");
+        }
+    }
+
+    [EditorToolbarElement(id, typeof(SceneView))]
     class MoreDropdown : EditorToolbarDropdown
     {
         public const string id = "UIToorBar/MoreDropdown";
 
-        static string dropChoice = null;
-
         public MoreDropdown()
         {
-            // text = "Axis";
             icon = AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.game.ui.foundation/Editor/Res/Icon/more.png");
             clicked += ShowDropdown;
         }
@@ -232,10 +307,14 @@ namespace Game.UI.Foundation.Editor
         void ShowDropdown()
         {
             var menu = new GenericMenu();
-            menu.AddItem(new GUIContent("1"), dropChoice == "X", () => { dropChoice = "X"; });
-            menu.AddItem(new GUIContent("2"), dropChoice == "Y", () => { dropChoice = "Y"; });
-            menu.AddItem(new GUIContent("3"), dropChoice == "Z", () => { dropChoice = "Z"; });
+            menu.AddItem(new GUIContent("Settings"), false, () => { OpenSetting(); });
             menu.ShowAsContext();
+        }
+
+
+        void OpenSetting()
+        {
+            SettingsService.OpenProjectSettings("Project/UI Foundation");
         }
     }
 }
