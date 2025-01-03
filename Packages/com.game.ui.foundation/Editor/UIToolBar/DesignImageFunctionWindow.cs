@@ -5,37 +5,24 @@ using UnityEditor;
 
 namespace Game.UI.Foundation.Editor
 {
-    public class DesignImageFunctionWindow : EditorWindow
+    public class DesignImageFunctionWindow : PopupWindowContent
     {
-        private static DesignImageFunctionWindow m_Window;
-
-        public static void Show(Rect activatorRect, Vector2 size, DesignImage designImage)
-        {
-            var popup = EditorWindow.GetWindow<DesignImageFunctionWindow>();
-            popup.hideFlags = HideFlags.DontSave;
-            popup.ShowAsDropDown(activatorRect, size);
-            popup.Init(designImage);
-            m_Window = popup;
-        }
-
-        public static void CloseWindow()
-        {
-            if (m_Window == null) return;
-            m_Window.Close();
-        }
-
-
         private DesignImage m_DesignImage;
 
-        public void Init(DesignImage designImage)
+        public DesignImageFunctionWindow(DesignImage designImage)
         {
             m_DesignImage = designImage;
         }
 
-        private void OnGUI()
+        public override Vector2 GetWindowSize()
+        {
+            return new Vector2(200, 90);
+        }
+
+        public override void OnGUI(Rect rect)
         {
             GUILayout.BeginVertical();
-
+            GUILayout.Label("设计图工具");
             GUILayout.BeginHorizontal();
             if (GUILayout.Button("顶层")) m_DesignImage.SetTop();
             if (GUILayout.Button("底层")) m_DesignImage.SetBottom();

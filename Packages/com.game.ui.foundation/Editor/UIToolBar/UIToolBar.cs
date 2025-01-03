@@ -30,14 +30,13 @@ namespace Game.UI.Foundation.Editor
             CreateText.id,
             CreateImage.id,
             PrefabWidget.id,
-            Settings.id,
-            MoreDropdown.id
+            Settings.id
+            // MoreDropdown.id
             // DropdownToggleExample.id
         )
         {
         }
     }
-
 
     [EditorToolbarElement(id, typeof(SceneView))]
     class CreateDesignImage : EditorToolbarDropdownToggle, IAccessContainerWindow
@@ -60,15 +59,13 @@ namespace Game.UI.Foundation.Editor
 
             this.RegisterValueChangedCallback(delegate(ChangeEvent<bool> evt)
             {
-                FindDesignImage();
+                if (m_DesignImage == null)
+                    CreateDesignImageGO();
+                else
+                    FindDesignImage();
 
                 if (m_DesignImage != null)
                     m_DesignImage.gameObject.SetActive(evt.newValue);
-
-                if (!evt.newValue)
-                {
-                    DesignImageFunctionWindow.CloseWindow();
-                }
             });
 
             RegisterCallback<AttachToPanelEvent>(OnAttachedToPanel);
@@ -87,25 +84,11 @@ namespace Game.UI.Foundation.Editor
 
         void OnDropdownClicked()
         {
+            if (Application.isPlaying) return;
             FindDesignImage();
             if (m_DesignImage == null)
             {
-                var stage = PrefabStageUtility.GetCurrentPrefabStage();
-                if (stage == null)
-                    return;
-
-                var root = CreateImage.GetCanvas();
-                if (root == null)
-                    return;
-
-                var go = new GameObject();
-                m_DesignImage = go.AddComponent<DesignImage>();
-                go.layer = LayerMask.NameToLayer("UI");
-                go.transform.SetParent(root.transform);
-                var rt = (go.transform as RectTransform);
-                rt.SetStretch();
-
-                Undo.RegisterCreatedObjectUndo(go, "Create DesignImage");
+                CreateDesignImageGO();
             }
 
             ShowWindow();
@@ -118,10 +101,31 @@ namespace Game.UI.Foundation.Editor
             if (!(containerWindow is SceneView view))
                 return;
 
-            var size = new Vector2(300, 80);
-
             var activatorRect = GUIUtility.GUIToScreenRect(this.worldBound);
-            DesignImageFunctionWindow.Show(activatorRect, size, m_DesignImage);
+            UnityEditor.PopupWindow.Show(worldBound, new DesignImageFunctionWindow(m_DesignImage));
+        }
+
+        void CreateDesignImageGO()
+        {
+            if (m_DesignImage != null) return;
+
+            var stage = PrefabStageUtility.GetCurrentPrefabStage();
+            if (stage == null)
+                return;
+
+            var root = CreateImage.GetCanvas();
+            if (root == null)
+                return;
+
+            var go = new GameObject();
+            m_DesignImage = go.AddComponent<DesignImage>();
+            go.layer = LayerMask.NameToLayer("UI");
+            go.transform.SetParent(root.transform);
+            var rt = (go.transform as RectTransform);
+            rt.SetStretch();
+            EditorGUIUtility.PingObject(go);
+
+            Undo.RegisterCreatedObjectUndo(go, "Create DesignImage");
         }
 
         void FindDesignImage()
@@ -155,9 +159,10 @@ namespace Game.UI.Foundation.Editor
 
         void OnClick()
         {
+            if (Application.isPlaying) return;
             // 下一次点胶机到游戏物体得时候 就会创建子物体
-            var canvas = CreateImage.GetCanvas();
-            if (canvas == null)
+            var root = CreateImage.GetCanvas();
+            if (root == null)
                 return;
 
             GameObject go;
@@ -166,6 +171,7 @@ namespace Game.UI.Foundation.Editor
                 go = new GameObject("Text");
                 var text = go.AddComponent<UnityEngine.UI.Text>();
                 text.text = "Text";
+                text.raycastTarget = false;
             }
             else
             {
@@ -173,8 +179,9 @@ namespace Game.UI.Foundation.Editor
             }
 
             go.layer = LayerMask.NameToLayer("UI");
-            go.transform.SetParent(canvas.transform);
+            go.transform.SetParent(root.transform);
             (go.transform as RectTransform).anchoredPosition3D = Vector3.zero;
+            EditorGUIUtility.PingObject(go);
 
             Undo.RegisterCreatedObjectUndo(go, "Create Text");
         }
@@ -215,29 +222,21 @@ namespace Game.UI.Foundation.Editor
 
         void OnClick()
         {
-            var canvas = CreateImage.GetCanvas();
-            if (canvas == null)
+            if (Application.isPlaying) return;
+
+            var root = CreateImage.GetCanvas();
+            if (root == null)
                 return;
 
             var go = new GameObject("Image");
             var img = go.AddComponent<UnityEngine.UI.Image>();
             img.raycastTarget = false;
             go.layer = LayerMask.NameToLayer("UI");
-            go.transform.SetParent(canvas.transform);
+            go.transform.SetParent(root.transform);
             (go.transform as RectTransform).anchoredPosition3D = Vector3.zero;
-            Undo.RegisterCreatedObjectUndo(go, "Create Image");
-        }
+            EditorGUIUtility.PingObject(go);
 
-        void Create(ChangeEvent<bool> evt)
-        {
-            if (evt.newValue)
-            {
-                Debug.Log("ON");
-            }
-            else
-            {
-                Debug.Log("OFF");
-            }
+            Undo.RegisterCreatedObjectUndo(go, "Create Image");
         }
     }
 
