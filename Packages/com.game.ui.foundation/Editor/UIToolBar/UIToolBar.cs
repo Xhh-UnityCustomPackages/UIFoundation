@@ -59,10 +59,9 @@ namespace Game.UI.Foundation.Editor
 
             this.RegisterValueChangedCallback(delegate(ChangeEvent<bool> evt)
             {
+                FindDesignImage();
                 if (m_DesignImage == null)
                     CreateDesignImageGO();
-                else
-                    FindDesignImage();
 
                 if (m_DesignImage != null)
                     m_DesignImage.gameObject.SetActive(evt.newValue);
