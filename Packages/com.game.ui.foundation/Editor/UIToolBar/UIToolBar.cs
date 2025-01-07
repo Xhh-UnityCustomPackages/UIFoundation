@@ -50,7 +50,8 @@ namespace Game.UI.Foundation.Editor
         public CreateDesignImage()
         {
             // text = "设计图";
-            icon = AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.game.ui.foundation/Editor/Res/Icon/createDesignImage.png");
+
+            icon = ToolUtils.GetIcon("createDesignImage");
             tooltip = "创建设计图";
 
 
@@ -151,7 +152,7 @@ namespace Game.UI.Foundation.Editor
         public CreateText()
         {
             // text = "Text";
-            icon = AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.game.ui.foundation/Editor/Res/Icon/createText.png");
+            icon = ToolUtils.GetIcon("createText");
             tooltip = "创建 Text";
             clicked += OnClick;
         }
@@ -194,7 +195,7 @@ namespace Game.UI.Foundation.Editor
         public CreateImage()
         {
             // text = "Image";
-            icon = AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.game.ui.foundation/Editor/Res/Icon/createImage.png");
+            icon = ToolUtils.GetIcon("createImage");
             tooltip = "创建 Image";
             clicked += OnClick;
         }
@@ -247,7 +248,7 @@ namespace Game.UI.Foundation.Editor
         public PrefabWidget()
         {
             // text = "Image";
-            icon = AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.game.ui.foundation/Editor/Res/Icon/prefabRepository.png");
+            icon = ToolUtils.GetIcon("prefabRepository");
             tooltip = "组件库";
             // clicked += OnClick;
             this.RegisterValueChangedCallback(Create);
@@ -255,18 +256,18 @@ namespace Game.UI.Foundation.Editor
 
         void OnClick()
         {
-            WidgetRepositoryWindow.OpenWindow();
+            WidgetLibraryWindow.OpenWindow();
         }
 
         void Create(ChangeEvent<bool> evt)
         {
             if (evt.newValue)
             {
-                WidgetRepositoryWindow.OpenWindow();
+                WidgetLibraryWindow.OpenWindow();
             }
             else
             {
-                WidgetRepositoryWindow.CloseWindow();
+                WidgetLibraryWindow.GetInstance().Close();
             }
         }
     }
@@ -280,7 +281,7 @@ namespace Game.UI.Foundation.Editor
         public Settings()
         {
             // text = "Image";
-            icon = AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.game.ui.foundation/Editor/Res/Icon/setting.png");
+            icon = ToolUtils.GetIcon("setting");
             tooltip = "设置";
             clicked += OnClick;
         }
@@ -298,7 +299,7 @@ namespace Game.UI.Foundation.Editor
 
         public MoreDropdown()
         {
-            icon = AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.game.ui.foundation/Editor/Res/Icon/more.png");
+            icon = ToolUtils.GetIcon("more");
             clicked += ShowDropdown;
         }
 

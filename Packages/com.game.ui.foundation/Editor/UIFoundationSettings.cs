@@ -11,7 +11,7 @@ namespace Game.UI.Foundation.Editor
     public class UIFoundationSettings : ScriptableObject
     {
         public GameObject DefaultTextPrefab;
-
+        public Object WidgetRoot;
 
         internal const string k_SettingsPath = "ProjectSettings/UIFoundationSettings.asset";
 
@@ -87,6 +87,7 @@ namespace Game.UI.Foundation.Editor
         {
             // Use IMGUI to display UI:
             EditorGUILayout.PropertyField(m_Settings.FindProperty("DefaultTextPrefab"));
+            EditorGUILayout.PropertyField(m_Settings.FindProperty("WidgetRoot"));
 
             if (m_Settings.hasModifiedProperties)
             {
