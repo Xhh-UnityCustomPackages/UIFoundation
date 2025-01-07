@@ -99,9 +99,9 @@ namespace Game.UI.Foundation.Editor
 
             List<string> list = new();
 
-            if (UIFoundationSettings.Instance.WidgetRoot != null)
+            if (UIFoundationSettings.Instance.WidgetLibrary != null)
             {
-                list.AddRange(AssetDatabase.FindAssets("t:prefab", new string[] { AssetDatabase.GetAssetPath(UIFoundationSettings.Instance.WidgetRoot) }));
+                list.AddRange(AssetDatabase.FindAssets("t:prefab", new string[] { AssetDatabase.GetAssetPath(UIFoundationSettings.Instance.WidgetLibrary) }));
             }
             else
             {
@@ -116,7 +116,7 @@ namespace Game.UI.Foundation.Editor
                     CreateFolder("Assets", "WidgetLibrary");
                 }
 
-                UIFoundationSettings.Instance.WidgetRoot = AssetDatabase.LoadAssetAtPath<Object>("Assets/WidgetLibrary");
+                UIFoundationSettings.Instance.WidgetLibrary = AssetDatabase.LoadAssetAtPath<Object>("Assets/WidgetLibrary");
                 UIFoundationSettings.Instance.Save();
             }
 

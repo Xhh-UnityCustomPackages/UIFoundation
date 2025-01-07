@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEditor;
 using UnityEditorInternal;
 using System.IO;
+using UnityEngine.Serialization;
 using UnityEngine.UIElements;
 
 namespace Game.UI.Foundation.Editor
@@ -11,7 +12,7 @@ namespace Game.UI.Foundation.Editor
     public class UIFoundationSettings : ScriptableObject
     {
         public GameObject DefaultTextPrefab;
-        public Object WidgetRoot;
+        public Object WidgetLibrary;
 
         internal const string k_SettingsPath = "ProjectSettings/UIFoundationSettings.asset";
 
@@ -87,7 +88,7 @@ namespace Game.UI.Foundation.Editor
         {
             // Use IMGUI to display UI:
             EditorGUILayout.PropertyField(m_Settings.FindProperty("DefaultTextPrefab"));
-            EditorGUILayout.PropertyField(m_Settings.FindProperty("WidgetRoot"));
+            EditorGUILayout.PropertyField(m_Settings.FindProperty("WidgetLibrary"));
 
             if (m_Settings.hasModifiedProperties)
             {

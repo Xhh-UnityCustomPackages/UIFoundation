@@ -13,3 +13,4 @@ MonoBehaviour:
   m_Name: UIFoundationSettings
   m_EditorClassIdentifier: 
   DefaultTextPrefab: {fileID: 0}
+  WidgetLibrary: {fileID: 102900000, guid: 6d889894cfaa4284f8293178e7d0c8f3, type: 3}
