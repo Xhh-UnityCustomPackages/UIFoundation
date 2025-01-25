@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c871f8210d4c2684893a5555c99db0f3, type: 3}
-  m_Name: UIFoundationSettings
+  m_Name: 
   m_EditorClassIdentifier: 
   DefaultTextPrefab: {fileID: 0}
   WidgetLibrary: {fileID: 102900000, guid: 6d889894cfaa4284f8293178e7d0c8f3, type: 3}

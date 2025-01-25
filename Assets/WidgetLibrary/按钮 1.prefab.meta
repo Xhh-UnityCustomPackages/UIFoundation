@@ -1,8 +1,9 @@
 fileFormatVersion: 2
-guid: 87b33fb49a4b75043a08c2c699ee18c4
-NativeFormatImporter:
+guid: 320de32fbe88e9645a65d92de03ea958
+labels:
+- "\u56FE\u7247"
+PrefabImporter:
   externalObjects: {}
-  mainObjectFileID: 11400000
   userData: 
   assetBundleName: 
   assetBundleVariant: 
