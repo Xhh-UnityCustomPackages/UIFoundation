@@ -176,6 +176,7 @@ namespace Game.UI.Foundation.Editor
             else
             {
                 go = GameObject.Instantiate(UIFoundationSettings.Instance.DefaultTextPrefab);
+                go.name = "Text";
             }
 
             go.layer = LayerMask.NameToLayer("UI");
