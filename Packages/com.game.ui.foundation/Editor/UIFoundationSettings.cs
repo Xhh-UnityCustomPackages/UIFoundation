@@ -86,6 +86,8 @@ namespace Game.UI.Foundation.Editor
 
         public override void OnGUI(string searchContext)
         {
+            EditorGUILayout.LabelField("按住「Alt」键将图片拖放到 Hierarchy窗口 内的 RectTransform 下可直接创建 Image ");
+            EditorGUILayout.Space(5);
             // Use IMGUI to display UI:
             EditorGUILayout.PropertyField(m_Settings.FindProperty("DefaultTextPrefab"));
             EditorGUILayout.PropertyField(m_Settings.FindProperty("WidgetLibrary"));

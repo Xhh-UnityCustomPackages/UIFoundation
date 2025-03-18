@@ -14,26 +14,15 @@ using UnityEditor.Overlays;
 
 namespace Game.UI.Foundation.Editor
 {
-// All Overlays must be tagged with the OverlayAttribute
-    [Overlay(typeof(SceneView), "UI Toolbar")]
-// IconAttribute provides a way to define an icon for when an Overlay is in collapsed form. If not provided, the name initials are used.
-    [Icon("Assets/unity.png")]
-// Toolbar Overlays must inherit `ToolbarOverlay` and implement a parameter-less constructor. The contents of a toolbar are populated with string IDs, which are passed to the base constructor. IDs are defined by EditorToolbarElementAttribute.
-    public class UIToorBar : ToolbarOverlay
+    [Overlay(typeof(SceneView), "UIToorBar", true)]
+    public class UIToolsOverlay : ToolbarOverlay
     {
-        // ToolbarOverlay implements a parameterless constructor, passing the EditorToolbarElementAttribute ID.
-        // This is the only code required to implement a toolbar Overlay. Unlike panel Overlays, the contents are defined
-        // as standalone pieces that will be collected to form a strip of elements.
-
-        UIToorBar() : base(
-            CreateDesignImage.id,
+        public UIToolsOverlay() : base(CreateDesignImage.id,
             CreateText.id,
             CreateImage.id,
             PrefabWidget.id,
-            Settings.id
-            // MoreDropdown.id
-            // DropdownToggleExample.id
-        )
+            "UITools/Tools",
+            Settings.id)
         {
         }
     }
@@ -51,9 +40,8 @@ namespace Game.UI.Foundation.Editor
         {
             // text = "设计图";
 
-            icon = ToolUtils.GetIcon("createDesignImage");
+            icon = UITools.Instance.IconDesignImage;
             tooltip = "创建设计图";
-
 
             FindDesignImage();
             value = m_DesignImage != null && m_DesignImage.gameObject.activeSelf;
@@ -152,7 +140,7 @@ namespace Game.UI.Foundation.Editor
         public CreateText()
         {
             // text = "Text";
-            icon = ToolUtils.GetIcon("createText");
+            icon = UITools.Instance.IconCreateText;
             tooltip = "创建 Text";
             clicked += OnClick;
         }
@@ -196,7 +184,7 @@ namespace Game.UI.Foundation.Editor
         public CreateImage()
         {
             // text = "Image";
-            icon = ToolUtils.GetIcon("createImage");
+            icon = UITools.Instance.IconCreateImage;
             tooltip = "创建 Image";
             clicked += OnClick;
         }
@@ -249,7 +237,7 @@ namespace Game.UI.Foundation.Editor
         public PrefabWidget()
         {
             // text = "Image";
-            icon = ToolUtils.GetIcon("prefabRepository");
+            icon = UITools.Instance.IconPrefabWidget;
             tooltip = "组件库";
             // clicked += OnClick;
             this.RegisterValueChangedCallback(Create);
@@ -282,7 +270,7 @@ namespace Game.UI.Foundation.Editor
         public Settings()
         {
             // text = "Image";
-            icon = ToolUtils.GetIcon("setting");
+            icon = UITools.Instance.IconSettings;
             tooltip = "设置";
             clicked += OnClick;
         }
@@ -300,7 +288,8 @@ namespace Game.UI.Foundation.Editor
 
         public MoreDropdown()
         {
-            icon = ToolUtils.GetIcon("more");
+            icon = UITools.Instance.IconMore;
+            ToolUtils.GetIcon("more");
             clicked += ShowDropdown;
         }
 
