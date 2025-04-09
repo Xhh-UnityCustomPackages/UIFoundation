@@ -13,6 +13,12 @@ public class LongPressButton : Button, IPointerDownHandler, IPointerUpHandler
     [SerializeField] private float m_CheckTime = 0.5f; //检测长按的时长
     [SerializeField] private ButtonClickedEvent m_OnLongPress = new ButtonClickedEvent();
 
+    public ButtonClickedEvent onLongPress
+    {
+        get { return m_OnLongPress; }
+        set { m_OnLongPress = value; }
+    }
+
     private bool m_IsDown; //是否按下
     private float m_DownTime; //按下的那一刻时间
 
