@@ -168,8 +168,12 @@ namespace Game.UI.Foundation.Editor
             }
 
             go.layer = LayerMask.NameToLayer("UI");
-            go.transform.SetParent(root.transform);
+            if (Selection.activeTransform != null)
+                go.transform.SetParent(Selection.activeTransform);
+            else
+                go.transform.SetParent(root.transform);
             (go.transform as RectTransform).anchoredPosition3D = Vector3.zero;
+            Selection.activeTransform = go.transform;
             EditorGUIUtility.PingObject(go);
 
             Undo.RegisterCreatedObjectUndo(go, "Create Text");
@@ -221,8 +225,12 @@ namespace Game.UI.Foundation.Editor
             var img = go.AddComponent<UnityEngine.UI.Image>();
             img.raycastTarget = false;
             go.layer = LayerMask.NameToLayer("UI");
-            go.transform.SetParent(root.transform);
+            if (Selection.activeTransform != null)
+                go.transform.SetParent(Selection.activeTransform);
+            else
+                go.transform.SetParent(root.transform);
             (go.transform as RectTransform).anchoredPosition3D = Vector3.zero;
+            Selection.activeTransform = go.transform;
             EditorGUIUtility.PingObject(go);
 
             Undo.RegisterCreatedObjectUndo(go, "Create Image");
