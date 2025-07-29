@@ -17,10 +17,20 @@ namespace Game.UI.Foundation.Editor
         /// </summary>
         public static Vector3 ObjFinalPos;
         /// <summary>
+        /// 表示本次EditorApplication.update吸附到的辅助线距离
+        /// Vert代表竖直，Horiz代表水平
+        /// </summary>
+        public static float SnapLineDisVert, SnapLineDisHoriz;
+        /// <summary>
         /// 表示本次EditorApplication.update吸附到的边缘距离
         /// Vert代表竖直，Horiz代表水平
         /// </summary>
         public static float SnapEdgeDisVert, SnapEdgeDisHoriz;
+        /// <summary>
+        /// 表示本次EditorApplication.update吸附到的Interval距离
+        /// Vert代表竖直，Horiz代表水平
+        /// </summary>
+        public static float SnapIntervalDisVert, SnapIntervalDisHoriz;
         
         public static float SnapWorldDistance
         {

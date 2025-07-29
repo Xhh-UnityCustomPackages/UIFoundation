@@ -23,26 +23,7 @@ namespace Game.UI.Foundation.Editor
 
         protected readonly Color m_MyBlue = new(0.4f, 0.8f, 1f);
         protected readonly Color m_MyRed = new(1f, 0.3f, 0.3f);
-
         
-        // protected static List<RectEx> m_Rects;
-        //
-        // protected struct RectEx
-        // {
-        //     /// <summary>
-        //     /// 长度为4，上下左右
-        //     /// </summary>
-        //     public float[] pos;
-        //
-        //     public RectEx(RectTransform trans)
-        //     {
-        //         pos = new float[4];
-        //         pos[0] = (float)Math.Round((double)trans.GetTopWorldPosition(), 1);
-        //         pos[1] = (float)Math.Round((double)trans.GetBottomWorldPosition(), 1);
-        //         pos[2] = (float)Math.Round((double)trans.GetLeftWorldPosition(), 1);
-        //         pos[3] = (float)Math.Round((double)trans.GetRightWorldPosition(), 1);
-        //     }
-        // }
         
         public CustomClickable clickable
         {
@@ -107,7 +88,6 @@ namespace Game.UI.Foundation.Editor
             if (evt.button == 0 && m_Selected)
             {
                 m_Selected = false;
-                LocationLineLogic.S.ModifyLine(this);
             }
             UpdateLineState();
         }
@@ -130,6 +110,11 @@ namespace Game.UI.Foundation.Editor
         }
         
         protected virtual void OnDrag(Vector2 mousePosition)
+        {
+
+        }
+        
+        public virtual void UpdateLineScreenViewPos(SceneView sceneView)
         {
 
         }
@@ -225,17 +210,7 @@ namespace Game.UI.Foundation.Editor
             style.bottom = y - style.height.value.value / 2;
             Vector3 mousePos = SceneView.lastActiveSceneView.camera.ScreenToWorldPoint(new Vector3(0, y, 0));
             float minDis = Mathf.Infinity;
-            // foreach (var rect in m_Rects)
-            // {
-            //     if (Mathf.Abs(minDis) > Mathf.Abs(rect.pos[0] - mousePos.y))
-            //     {
-            //         minDis = rect.pos[0] - mousePos.y;
-            //     }
-            //     if (Mathf.Abs(minDis) > Mathf.Abs(rect.pos[1] - mousePos.y))
-            //     {
-            //         minDis = rect.pos[1] - mousePos.y;
-            //     }
-            // }
+         
             if (Mathf.Abs(minDis) < SnapLogic.SnapWorldDistance)
             {
                 worldPostion = mousePos + new Vector3(0, minDis, 0);
@@ -246,6 +221,14 @@ namespace Game.UI.Foundation.Editor
                 worldPostion = mousePos;
             }
             SceneView.lastActiveSceneView.Repaint();
+        }
+        
+        public override void UpdateLineScreenViewPos(SceneView sceneView)
+        {
+            if (!m_Selected)
+            {
+                style.bottom = sceneView.camera.WorldToScreenPoint(worldPostion).y - style.height.value.value / 2;
+            }
         }
     }
 
@@ -272,21 +255,10 @@ namespace Game.UI.Foundation.Editor
         {
             style.left = mousePosition.x - style.width.value.value / 2;
 
-            float screenLeft = style.left.value.value + style.width.value.value / 2;
             Vector3 mousePos = SceneView.lastActiveSceneView.camera.ScreenToWorldPoint(new Vector3(mousePosition.x, 0, 0));
 
             float minDis = Mathf.Infinity;
-            // foreach (var rect in m_Rects)
-            // {
-            //     if (Mathf.Abs(minDis) > Mathf.Abs(rect.pos[2] - mousePos.x))
-            //     {
-            //         minDis = rect.pos[2] - mousePos.x;
-            //     }
-            //     if (Mathf.Abs(minDis) > Mathf.Abs(rect.pos[3] - mousePos.x))
-            //     {
-            //         minDis = rect.pos[3] - mousePos.x;
-            //     }
-            // }
+            
             if (Mathf.Abs(minDis) < SnapLogic.SnapWorldDistance)
             {
                 worldPostion = mousePos + new Vector3(minDis, 0, 0);
@@ -297,6 +269,15 @@ namespace Game.UI.Foundation.Editor
                 worldPostion = mousePos;
             }
             SceneView.lastActiveSceneView.Repaint();
+        }
+        
+        //用来更新 SceneView的拖动或者滚轮缩放后 辅助线在SceneView的位置
+        public override void UpdateLineScreenViewPos(SceneView sceneView)
+        {
+            if (!m_Selected)
+            {
+                style.left = sceneView.camera.WorldToScreenPoint(worldPostion).x - style.width.value.value / 2;
+            }
         }
     }
 }
