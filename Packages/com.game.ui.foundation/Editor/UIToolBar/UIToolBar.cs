@@ -22,8 +22,34 @@ namespace Game.UI.Foundation.Editor
             CreateImage.id,
             PrefabWidget.id,
             "UITools/Tools",
+            LocationLineToolbar.id,
             Settings.id)
         {
+        }
+
+        public override void OnCreated()
+        {
+            this.displayedChanged += OnDisplayChanged;
+        }
+
+       
+        public override void OnWillBeDestroyed()
+        {
+            this.displayedChanged -= OnDisplayChanged;
+        }
+
+        void OnDisplayChanged(bool visible)
+        {
+            if (visible)
+            {
+                LocationLineLogic.S.Open();
+                EdgeSnapLineLogic.S.Open();
+            }
+            else
+            {
+                LocationLineLogic.S.Close();
+                EdgeSnapLineLogic.S.Close();
+            }
         }
     }
 
@@ -32,7 +58,6 @@ namespace Game.UI.Foundation.Editor
     {
         public const string id = "UIToorBar/CreateDesignImage";
         public EditorWindow containerWindow { get; set; }
-
 
         private DesignImage m_DesignImage;
 
@@ -131,7 +156,6 @@ namespace Game.UI.Foundation.Editor
         }
     }
 
-
     [EditorToolbarElement(id, typeof(SceneView))]
     class CreateText : EditorToolbarButton //, IAccessContainerWindow
     {
@@ -172,6 +196,7 @@ namespace Game.UI.Foundation.Editor
                 go.transform.SetParent(Selection.activeTransform);
             else
                 go.transform.SetParent(root.transform);
+            go.transform.localScale = Vector3.one;
             (go.transform as RectTransform).anchoredPosition3D = Vector3.zero;
             Selection.activeTransform = go.transform;
             EditorGUIUtility.PingObject(go);
@@ -229,6 +254,7 @@ namespace Game.UI.Foundation.Editor
                 go.transform.SetParent(Selection.activeTransform);
             else
                 go.transform.SetParent(root.transform);
+            go.transform.localScale = Vector3.one;
             (go.transform as RectTransform).anchoredPosition3D = Vector3.zero;
             Selection.activeTransform = go.transform;
             EditorGUIUtility.PingObject(go);
@@ -269,7 +295,6 @@ namespace Game.UI.Foundation.Editor
         }
     }
 
-
     [EditorToolbarElement(id, typeof(SceneView))]
     class Settings : EditorToolbarButton
     {
@@ -286,6 +311,40 @@ namespace Game.UI.Foundation.Editor
         void OnClick()
         {
             SettingsService.OpenProjectSettings("Project/UI Foundation");
+        }
+    }
+
+    [EditorToolbarElement(id, typeof(SceneView))]
+    class LocationLineToolbar : EditorToolbarDropdown
+    {
+        public const string id = "UIToorBar/LocationLine";
+
+        public LocationLineToolbar()
+        {
+            icon = UITools.Instance.IconReferenceLine;
+            tooltip = "辅助线";
+            ToolUtils.GetIcon("more");
+            clicked += ShowDropdown;
+        }
+
+        void ShowDropdown()
+        {
+            var menu = new GenericMenu();
+            menu.AddItem(new GUIContent("X&Y-水平&垂直"), false, () => { AddLocationLine(CreateLineType.Both); });
+            menu.AddItem(new GUIContent("X-水平"), false, () => { AddLocationLine(CreateLineType.Horizon); });
+            menu.AddItem(new GUIContent("Y-垂直"), false, () => { AddLocationLine(CreateLineType.Vertical); });
+            menu.AddItem(new GUIContent("清空所有辅助线"), false, () => { ClearLocationLine(); });
+            menu.ShowAsContext();
+        }
+
+        void AddLocationLine(CreateLineType type)
+        {
+            LocationLineLogic.S.CreateLocationLine(type);
+        }
+
+        void ClearLocationLine()
+        {
+            LocationLineLogic.S.Clear();
         }
     }
 
@@ -307,7 +366,6 @@ namespace Game.UI.Foundation.Editor
             menu.AddItem(new GUIContent("Settings"), false, () => { OpenSetting(); });
             menu.ShowAsContext();
         }
-
 
         void OpenSetting()
         {

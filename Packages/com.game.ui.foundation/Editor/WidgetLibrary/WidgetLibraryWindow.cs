@@ -387,7 +387,7 @@ namespace Game.UI.Foundation.Editor
                         mousePos.y = sceneView.camera.pixelHeight - mousePos.y;
                         Vector3 WorldPos = sceneView.camera.ScreenToWorldPoint(new Vector3(mousePos.x, mousePos.y, 0));
                         Vector3 localPos = container.InverseTransformPoint(new Vector3(WorldPos.x, WorldPos.y, 0));
-                        bool unpack = AssetDatabase.GetLabels(LoadPrefab).Contains("Unpack");
+                        bool unpack = !AssetDatabase.GetLabels(LoadPrefab).Contains("Prefab");
                         if (unpack)
                         {
                             DragPerformAsUnPack(container, localPos);
@@ -414,6 +414,7 @@ namespace Game.UI.Foundation.Editor
             GameObject currentPrefab = PrefabUtility.InstantiatePrefab(LoadPrefab) as GameObject;
             currentPrefab.transform.SetParent(container);
             currentPrefab.transform.localPosition = localPos;
+            currentPrefab.transform.localScale = Vector3.one;
             Selection.activeObject = currentPrefab;
         }
 
@@ -422,6 +423,7 @@ namespace Game.UI.Foundation.Editor
             GameObject currentPrefab = PrefabUtility.InstantiatePrefab(LoadPrefab) as GameObject;
             currentPrefab.transform.SetParent(container);
             currentPrefab.transform.localPosition = localPos;
+            currentPrefab.transform.localScale = Vector3.one;
             Selection.activeObject = currentPrefab;
             PrefabUtility.UnpackPrefabInstance(currentPrefab, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
         }

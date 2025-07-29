@@ -22,6 +22,7 @@ namespace Game.UI.Foundation.Editor
         public Texture2D IconAlignTop { get; private set; }
         public Texture2D IconAlignCenter { get; private set; }
         public Texture2D IconAlignBottom { get; private set; }
+        public Texture2D IconReferenceLine { get; private set; }
 
 
         private static UITools s_Instance;
@@ -58,6 +59,7 @@ namespace Game.UI.Foundation.Editor
             IconAlignTop = ToolUtils.GetIcon("align_top"),
             IconAlignCenter = ToolUtils.GetIcon("align_center"),
             IconAlignBottom = ToolUtils.GetIcon("align_bottom"),
+            IconReferenceLine = ToolUtils.GetIcon("referenceline"),
         };
 
         public static bool IsDisplayed => SceneView.lastActiveSceneView.TryGetOverlay("UIToorBar", out Overlay uiTools) && uiTools.displayed;

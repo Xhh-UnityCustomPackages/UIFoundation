@@ -87,6 +87,10 @@ namespace Game.UI.Foundation.Editor
         public override void OnGUI(string searchContext)
         {
             EditorGUILayout.LabelField("按住「Alt」键将图片拖放到 Hierarchy窗口 内的 RectTransform 下可直接创建 Image ");
+            EditorGUILayout.LabelField("组件库中的预制体,如果AssetLabel包含Prefab的话,拖出就会使用预制体");
+            EditorGUILayout.LabelField("对齐按钮： 分为「上」、「中」、「下」、「左」、「中」、「右」共6个按钮。");
+            EditorGUILayout.LabelField("\t当选中单个UI节点，则将该节点与父节点对齐。当选中多个UI节点，则将其他节点与第一个节点对齐。当按住Shift键再点击时，会同时设置节点的轴点。");
+                 
             EditorGUILayout.Space(5);
             // Use IMGUI to display UI:
             EditorGUILayout.PropertyField(m_Settings.FindProperty("DefaultTextPrefab"));
