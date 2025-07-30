@@ -30,6 +30,8 @@ namespace Game.UI.Foundation.Editor
         public override void OnCreated()
         {
             this.displayedChanged += OnDisplayChanged;
+            
+            SceneViewCursorLogic.S.Init();
         }
 
        
@@ -44,11 +46,13 @@ namespace Game.UI.Foundation.Editor
             {
                 LocationLineLogic.S.Open();
                 EdgeSnapLineLogic.S.Open();
+                SceneViewCursorLogic.S.Open();
             }
             else
             {
                 LocationLineLogic.S.Close();
                 EdgeSnapLineLogic.S.Close();
+                SceneViewCursorLogic.S.Close();
             }
         }
     }

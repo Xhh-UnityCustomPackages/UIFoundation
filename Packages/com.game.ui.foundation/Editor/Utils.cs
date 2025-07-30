@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using System.IO;
-using UnityEditor.SceneManagement;
+using System.Reflection;
+using System;
 
 namespace Game.UI.Foundation.Editor
 {
@@ -115,7 +116,8 @@ namespace Game.UI.Foundation.Editor
 
             Bounds bound = GetBounds(go);
 
-            cameraObj.transform.position = new Vector3((bound.max.x + bound.min.x) / 2, (bound.max.y + bound.min.y) / 2, (bound.max.z + bound.min.z) / 2 - 100);
+            cameraObj.transform.position = new Vector3((bound.max.x + bound.min.x) / 2, (bound.max.y + bound.min.y) / 2,
+                (bound.max.z + bound.min.z) / 2 - 100);
             cameraObj.transform.LookAt(cameraObj.transform.position);
 
             Camera camera = cameraObj.GetComponent<Camera>();
@@ -145,8 +147,8 @@ namespace Game.UI.Foundation.Editor
             rt.Release();
             RenderTexture.ReleaseTemporary(rt);
 
-            Object.DestroyImmediate(canvas);
-            Object.DestroyImmediate(cameraObj);
+            UnityEngine.Object.DestroyImmediate(canvas);
+            UnityEngine.Object.DestroyImmediate(cameraObj);
 
             return tex;
         }
@@ -219,5 +221,40 @@ namespace Game.UI.Foundation.Editor
 
         #endregion
 
+        #region Method
+
+        public static List<MethodInfo> GetEditorMethod(Type editorClassType, string methodName, int paraCount = -1)
+        {
+            List<MethodInfo> m = new List<MethodInfo>();
+
+            MethodInfo[] methods = editorClassType.GetMethods(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
+            foreach (var method in methods)
+            {
+                if (method.Name == methodName && method.GetParameters().Length == paraCount)
+                {
+                    m.Add(method);
+                }
+            }
+
+            return m;
+        }
+
+        #endregion
+
+        #region Cursor
+
+        public static void SetCursor(Texture2D texture)
+        {
+            List<MethodInfo> m = GetEditorMethod(typeof(EditorGUIUtility), "SetCurrentViewCursor", 3);
+            m[0].Invoke(null, new object[] { texture, new Vector2(16, 16), MouseCursor.CustomCursor });
+        }
+        
+        public static void ClearCurrentViewCursor()
+        {
+            List<MethodInfo> m = GetEditorMethod(typeof(EditorGUIUtility), "ClearCurrentViewCursor", 0);
+            m[0].Invoke(null, null);
+        }
+
+        #endregion
     }
 }

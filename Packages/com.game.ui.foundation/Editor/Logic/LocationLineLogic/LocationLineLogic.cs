@@ -14,7 +14,7 @@ namespace Game.UI.Foundation.Editor
         Vertical,
         Horizon
     }
-    
+
     [Serializable]
     public class LocationLineData
     {
@@ -25,7 +25,24 @@ namespace Game.UI.Foundation.Editor
 
     public class LocationLineLogic : UIToolBarLogic<LocationLineLogic>
     {
-        public static float sceneviewOffset;
+        public static float sceneviewOffset = 0;
+
+        /// <summary>
+        /// 计算SceneView工具栏的动态偏移，考虑高DPI屏幕
+        /// </summary>
+        private static float CalculateSceneViewOffset(SceneView sceneView)
+        {
+            if (sceneView == null) return 40f; // 默认值
+
+            // 获取编辑器的DPI缩放因子
+            float dpiScale = EditorGUIUtility.pixelsPerPoint;
+
+            // 基础工具栏高度（在标准DPI下约为40像素）
+            float baseToolbarHeight = 40f;
+
+            // 根据DPI缩放调整工具栏高度
+            return baseToolbarHeight * dpiScale;
+        }
 
         //所有辅助线对象 应该和上面的数据是一致的
         private List<LocationLine> m_LinesList;
@@ -37,8 +54,10 @@ namespace Game.UI.Foundation.Editor
 
         public override void Open()
         {
-            sceneviewOffset = 0;
             m_LinesList = new();
+
+            // 初始化动态偏移
+            UpdateSceneViewOffset();
 
             SceneView.duringSceneGui += OnSceneGUI;
             EditorApplication.update += UpdateLinesScreenViewPos; //辅助线根据放大缩小更新位置
@@ -49,6 +68,18 @@ namespace Game.UI.Foundation.Editor
             OnSelectionChanged();
         }
 
+        /// <summary>
+        /// 更新SceneView偏移值
+        /// </summary>
+        private void UpdateSceneViewOffset()
+        {
+            SceneView sceneView = SceneView.lastActiveSceneView;
+            if (sceneView != null)
+            {
+                sceneviewOffset = CalculateSceneViewOffset(sceneView);
+            }
+        }
+
         public override void Close()
         {
             SceneView.duringSceneGui -= OnSceneGUI;
@@ -56,7 +87,7 @@ namespace Game.UI.Foundation.Editor
             EditorApplication.update -= SnapToFinalPos;
             EditorApplication.update -= SnapToLocationLine;
             Selection.selectionChanged -= OnSelectionChanged;
-            
+
             Clear();
         }
 
@@ -101,8 +132,13 @@ namespace Game.UI.Foundation.Editor
         public void CreateLocationLine(CreateLineType createType)
         {
             SceneView sceneView = SceneView.lastActiveSceneView;
+
+            // 更新偏移值以确保使用最新的DPI设置
+            UpdateSceneViewOffset();
+
             Vector3 worldPostion =
-                    sceneView.camera.ScreenToWorldPoint(new(sceneView.camera.pixelWidth / 2, (sceneView.camera.pixelHeight - 40) / 2, 0));
+                    sceneView.camera.ScreenToWorldPoint(new(sceneView.camera.pixelWidth / 2, (sceneView.camera.pixelHeight - sceneviewOffset) / 2,
+                        0));
 
             int curId = LastLineId + 1;
             LocationLineData horzLineData = null;
@@ -172,6 +208,9 @@ namespace Game.UI.Foundation.Editor
         {
             SceneView sceneView = SceneView.lastActiveSceneView;
             if (sceneView == null) return;
+
+            // 定期更新偏移值以适应DPI变化
+            UpdateSceneViewOffset();
 
             var h = sceneView.camera.pixelHeight;
             foreach (LocationLine line in m_LinesList)

@@ -50,8 +50,17 @@ namespace Game.UI.Foundation.Editor
         public LocationLine()
         {
             SceneView sceneView = SceneView.lastActiveSceneView;
-            worldPostion = sceneView.camera.ScreenToWorldPoint(new Vector3(sceneView.camera.pixelWidth / 2, (sceneView.camera.pixelHeight - 40) / 2,
-                0));
+   
+            
+            // 使用动态偏移计算，而不是硬编码的40
+            float dynamicOffset = LocationLineLogic.sceneviewOffset;
+            
+            // 计算屏幕中心点，考虑工具栏偏移
+            float centerX = sceneView.camera.pixelWidth / 2f;
+            float centerY = (sceneView.camera.pixelHeight - dynamicOffset) / 2f;
+
+            worldPostion = sceneView.camera.ScreenToWorldPoint(new Vector3(centerX, centerY, 0));
+
 
             Action action = null;
 
@@ -62,8 +71,10 @@ namespace Game.UI.Foundation.Editor
             clickable.OnPointerUpAction += OnMouseUp;
             clickable.OnPointerLeaveAction += OnMouseOut;
 
-            style.left = sceneView.camera.pixelWidth / 2;
-            style.bottom = sceneView.camera.pixelHeight / 2;
+            // 考虑DPI缩放因子
+            float dpiScale = EditorGUIUtility.pixelsPerPoint;
+            style.left = centerX / dpiScale;
+            style.bottom = sceneView.camera.pixelHeight / (2 * dpiScale);
         }
 
         private void UpdateLineState()
@@ -73,6 +84,8 @@ namespace Game.UI.Foundation.Editor
 
         public void OnMouseOver(PointerEnterEvent evt)
         {
+            RecoverCursor();
+            SetCursor();
         }
 
         public void OnMouseDown(PointerDownEvent evt)
@@ -81,6 +94,7 @@ namespace Game.UI.Foundation.Editor
             {
                 m_Selected = true;
             }
+            UpdateLineState();
         }
 
         public void OnMouseUp(PointerUpEvent evt)
@@ -88,6 +102,7 @@ namespace Game.UI.Foundation.Editor
             if (evt.button == 0 && m_Selected)
             {
                 m_Selected = false;
+                RecoverCursor();
             }
             UpdateLineState();
         }
@@ -106,8 +121,36 @@ namespace Game.UI.Foundation.Editor
             if (m_Selected)
             {
                 OnDrag(Event.current.mousePosition);
+            }else
+            {
+                RecoverCursor();
             }
         }
+
+        #region Cursor
+
+        private UXCursorType GetCursorType()
+        {
+            if (direction == LocationLineDirection.Horizontal)
+            {
+                return UXCursorType.Updown;
+            }
+            else
+            {
+                return UXCursorType.Leftright;
+            }
+        }
+        
+        private void SetCursor()
+        {
+            SceneViewCursorLogic.S.SetCursor(GetCursorType());
+        }
+        private void RecoverCursor()
+        {
+            SceneViewCursorLogic.S.SetCursor(UXCursorType.None);
+        }
+
+        #endregion
         
         protected virtual void OnDrag(Vector2 mousePosition)
         {
@@ -202,19 +245,22 @@ namespace Game.UI.Foundation.Editor
 
         protected override void OnDrag(Vector2 mousePosition)
         {
-            mousePosition.y = mousePosition.y - LocationLineLogic.sceneviewOffset;
-            
-            //SceneView的(0,0)在左上角, 所以用SceneView的高减去mousePosition.y 才是距离底部的高度
-            float y = SceneView.lastActiveSceneView.camera.pixelHeight - mousePosition.y;
+            // 考虑DPI缩放因子
+            float dpiScale = EditorGUIUtility.pixelsPerPoint;
+            float adjustedMouseY = mousePosition.y * dpiScale - LocationLineLogic.sceneviewOffset;
 
-            style.bottom = y - style.height.value.value / 2;
+            //SceneView的(0,0)在左上角, 所以用SceneView的高减去mousePosition.y 才是距离底部的高度
+            float y = SceneView.lastActiveSceneView.camera.pixelHeight - adjustedMouseY;
+
+            style.bottom = y / dpiScale - style.height.value.value / 2;
             Vector3 mousePos = SceneView.lastActiveSceneView.camera.ScreenToWorldPoint(new Vector3(0, y, 0));
             float minDis = Mathf.Infinity;
-         
+
             if (Mathf.Abs(minDis) < SnapLogic.SnapWorldDistance)
             {
                 worldPostion = mousePos + new Vector3(0, minDis, 0);
-                style.bottom = SceneView.lastActiveSceneView.camera.WorldToScreenPoint(worldPostion).y - style.height.value.value / 2;
+                Vector3 worldScreenPos = SceneView.lastActiveSceneView.camera.WorldToScreenPoint(worldPostion);
+                style.bottom = worldScreenPos.y / dpiScale - style.height.value.value / 2;
             }
             else
             {
@@ -227,7 +273,17 @@ namespace Game.UI.Foundation.Editor
         {
             if (!m_Selected)
             {
-                style.bottom = sceneView.camera.WorldToScreenPoint(worldPostion).y - style.height.value.value / 2;
+                // 将世界坐标转换为屏幕坐标
+                Vector3 screenPos = sceneView.camera.WorldToScreenPoint(worldPostion);
+
+                // 考虑DPI缩放因子
+                float dpiScale = EditorGUIUtility.pixelsPerPoint;
+                float adjustedY = screenPos.y / dpiScale - style.height.value.value / 2f;
+
+                // 确保坐标在有效范围内
+                adjustedY = Mathf.Clamp(adjustedY, 0, sceneView.camera.pixelHeight / dpiScale);
+
+                style.bottom = adjustedY;
             }
         }
     }
@@ -253,16 +309,21 @@ namespace Game.UI.Foundation.Editor
         
         protected override void OnDrag(Vector2 mousePosition)
         {
-            style.left = mousePosition.x - style.width.value.value / 2;
+            // 考虑DPI缩放因子
+            float dpiScale = EditorGUIUtility.pixelsPerPoint;
+            float adjustedMouseX = mousePosition.x * dpiScale;
 
-            Vector3 mousePos = SceneView.lastActiveSceneView.camera.ScreenToWorldPoint(new Vector3(mousePosition.x, 0, 0));
+            style.left = adjustedMouseX - style.width.value.value / 2;
+
+            Vector3 mousePos = SceneView.lastActiveSceneView.camera.ScreenToWorldPoint(new Vector3(adjustedMouseX, 0, 0));
 
             float minDis = Mathf.Infinity;
-            
+
             if (Mathf.Abs(minDis) < SnapLogic.SnapWorldDistance)
             {
                 worldPostion = mousePos + new Vector3(minDis, 0, 0);
-                style.left = SceneView.lastActiveSceneView.camera.WorldToScreenPoint(worldPostion).x - style.width.value.value / 2;
+                Vector3 worldScreenPos = SceneView.lastActiveSceneView.camera.WorldToScreenPoint(worldPostion);
+                style.left = worldScreenPos.x / dpiScale - style.width.value.value / 2;
             }
             else
             {
@@ -276,7 +337,17 @@ namespace Game.UI.Foundation.Editor
         {
             if (!m_Selected)
             {
-                style.left = sceneView.camera.WorldToScreenPoint(worldPostion).x - style.width.value.value / 2;
+                // 将世界坐标转换为屏幕坐标
+                Vector3 screenPos = sceneView.camera.WorldToScreenPoint(worldPostion);
+
+                // 考虑DPI缩放因子
+                float dpiScale = EditorGUIUtility.pixelsPerPoint;
+                float adjustedX = screenPos.x / dpiScale - style.width.value.value / 2f;
+
+                // 确保坐标在有效范围内
+                adjustedX = Mathf.Clamp(adjustedX, 0, sceneView.camera.pixelWidth / dpiScale);
+
+                style.left = adjustedX;
             }
         }
     }
